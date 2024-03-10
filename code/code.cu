@@ -1,16 +1,3 @@
-/**
-*   CS6023: GPU Programming 
-*   Assignment 2
-*   
-*   Please don't change any existing code in this file.
-*
-*   Please add necessary memory APIs for your implementation. Use cudaFree() 
-*   to free up memory as soon as you're done with an allocation. 
-*   This will ensure that you don't run out of memory while running
-*   large test cases. Use the minimum required memory for your 
-*   implementation. DO NOT change the kernel configuration parameters.
-*/
-
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -18,11 +5,8 @@
 #include <cuda.h>
 
 using namespace std;
-
 using std::cin;
 using std::cout;
-
-typedef long long ll;
 
 
 __global__
@@ -74,7 +58,6 @@ int main(int argc, char** argv) {
 
     long int* h_mat = new long int[m * n];
     long int* h_filter = new long int[k * k];
-
     long int* h_ans = new long int[m * n];
 
 
@@ -85,15 +68,8 @@ int main(int argc, char** argv) {
     for (long int i = 0; i < k * k; i++) {
         cin>>h_filter[i];
     }
-
-    /**
-     * 
-     * DO NOT CHANGE ANYTHING ABOVE THIS LINE
-     * 
-    **/
-
-    /****************************************************Start Here***********************************************************/
     
+
     long int* d_mat;
     long int* d_filter;
     long int* d_ans;
@@ -108,29 +84,21 @@ int main(int argc, char** argv) {
     int blockSize = (k*k > n ? k*k : n);
     if(blockSize > 1024) blockSize = 1024;
 
-    auto start = std::chrono::high_resolution_clock::now();//keep it just before the kernel launch
+    auto start = std::chrono::high_resolution_clock::now();
     
     convolution<<<m, blockSize, k*k*sizeof(int)>>>(d_mat, d_filter, d_ans, m, n, k);
     cudaDeviceSynchronize();
     
-    auto end = std::chrono::high_resolution_clock::now();//keep it just after the kernel launch
+    auto end = std::chrono::high_resolution_clock::now();
     
     cudaMemcpy(h_ans, d_ans, m*n*sizeof(long int), cudaMemcpyDeviceToHost);
 
     cudaFree(d_mat);
     cudaFree(d_filter);
     cudaFree(d_ans);
-    
-    /*$$$$$$$$$$$$$$$$$$$$$$$$Make sure your final output from the device is stored in h_ans.$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$*/
-    std::chrono::duration<double> elapsed1 = end - start;
-    /**
-     * 
-     * DO NOT CHANGE ANYTHING BELOW THIS LINE
-     * 
-    */
-
 
     
+    //printing output and timings (time to compute convolution) in a file
     std::ofstream file("cuda.out");
     if (file.is_open()) {
         for (long int i = 0; i < m; i++) {
